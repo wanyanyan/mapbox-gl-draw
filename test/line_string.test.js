@@ -2,7 +2,8 @@ import test from 'tape';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import Feature from '../src/feature_types/feature';
 import LineString from '../src/feature_types/line_string';
-import MapboxDraw from '../';
+import GLDraw from '../';
+import mapboxgl from 'mapbox-gl-js-mock';
 import createFeature from './utils/create_feature';
 import getPublicMemberKeys from './utils/get_public_member_keys';
 import createMockCtx from './utils/create_mock_feature_context';
@@ -107,20 +108,20 @@ test('LineString#updateCoordinate', t => {
   t.end();
 });
 
-test('LineString integration', t => {
+test('LineString integration', function lineDrawClass(t){
   const lineStringCoordinates = [[0, 0], [40, 20], [20, 40]];
   const map = createMap();
-  const Draw = new MapboxDraw();
+  const Draw = GLDraw();
   map.addControl(Draw);
 
-  map.on('load', () => {
+  map.on('load', function() {
     drawGeometry(map, Draw, 'LineString', lineStringCoordinates, () => {
       const feats = Draw.getAll().features;
       t.equals(1, feats.length, 'only one');
       t.equals('LineString', feats[0].geometry.type, 'of the right type');
       t.equals(lineStringCoordinates[0].length, feats[0].geometry.coordinates[0].length, 'right number of points');
       t.deepEquals(lineStringCoordinates, feats[0].geometry.coordinates, 'in the right spot');
-      Draw.onRemove();
+      Draw.remove();
       t.end();
     });
   });

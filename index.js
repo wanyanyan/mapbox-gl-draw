@@ -1,28 +1,30 @@
-const runSetup = require('./src/setup');
-const setupOptions = require('./src/options');
-const setupAPI = require('./src/api');
+'use strict';
+
+var Setup = require('./src/setup');
+var Options = require('./src/options');
+var API = require('./src/api');
 const Constants = require('./src/constants');
 
-const setupDraw = function(options, api) {
-  options = setupOptions(options);
+var Draw = function(options) {
+  options = Options(options);
 
-  const ctx = {
+  var ctx = {
     options: options
   };
 
-  api = setupAPI(ctx, api);
+  var api = API(ctx);
   ctx.api = api;
 
-  const setup = runSetup(ctx);
-
-  api.onAdd = setup.onAdd;
-  api.onRemove = setup.onRemove;
+  var setup = Setup(ctx);
+  api.addTo = setup.addTo;
+  api.remove = setup.remove;
   api.types = Constants.types;
   api.options = options;
 
   return api;
 };
 
-module.exports = function(options) {
-  setupDraw(options, this);
-};
+module.exports = Draw;
+
+window.mapboxgl = window.mapboxgl || {};
+window.mapboxgl.Draw = Draw;

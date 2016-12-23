@@ -3,8 +3,8 @@ var app = express();
 var browserify = require('browserify-middleware');
 
 
-app.get('/mapbox-gl-draw.js', browserify('./index.js', {
-    standalone: 'MapboxDraw',
+app.get('/gl-draw-foxgis.js', browserify('./index.js', {
+    standalone: 'mapbox-gl-draw',
     debug: true,
     cache: 'dynamic',
     minify: false
@@ -38,5 +38,5 @@ app.use('/dist', express.static(__dirname + '/dist'));
 var port = process.env.PORT || 9967;
 
 app.listen(port, function () {
-    console.log('mapbox-gl-draw debug server running at http://localhost:' + port);
+    console.log('gl-draw-foxgis debug server running at http://localhost:' + port);
 });

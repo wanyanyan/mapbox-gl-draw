@@ -19,9 +19,8 @@ test('MultiPoint via MultiFeature', t => {
   t.equal(typeof MultiFeature.prototype.updateCoordinate, 'function', 'polygon.updateCoordinate');
   t.equal(typeof MultiFeature.prototype.addCoordinate, 'function', 'polygon.addCoordinate');
   t.equal(typeof MultiFeature.prototype.removeCoordinate, 'function', 'polygon.removeCoordinate');
-  t.equal(typeof MultiFeature.prototype.getFeatures, 'function', 'polygon.getFeatures');
 
-  t.equal(getPublicMemberKeys(MultiFeature.prototype).length, 8, 'no unexpected prototype members');
+  t.equal(getPublicMemberKeys(MultiFeature.prototype).length, 7, 'no unexpected prototype members');
 
   t.end();
 });
@@ -58,7 +57,7 @@ test('MultiPoint', t => {
   const pointC = multiPoint.features[2];
 
   t.deepEqual(pointA, new Point(ctx, {
-    id: pointA.id,
+    id: 'wahoo',
     type: 'Feature',
     properties: {},
     geometry: {
@@ -67,7 +66,7 @@ test('MultiPoint', t => {
     }
   }));
   t.deepEqual(pointB, new Point(ctx, {
-    id: pointB.id,
+    id: 'wahoo',
     type: 'Feature',
     properties: {},
     geometry: {
@@ -76,7 +75,7 @@ test('MultiPoint', t => {
     }
   }));
   t.deepEqual(pointC, new Point(ctx, {
-    id: pointC.id,
+    id: 'wahoo',
     type: 'Feature',
     properties: {},
     geometry: {
@@ -107,7 +106,7 @@ test('MultiPoint', t => {
     'getCoordinates returns the complete multi-coordinates');
 
   multiPoint.setCoordinates([[6, 6], [7, 7]]);
-  t.equal(changedSpy.callCount, 2, 'changed called by setCoordinates');
+  t.equal(changedSpy.callCount, 1, 'changed called by setCoordinates');
   t.deepEqual(multiPoint.getCoordinates(), [[6, 6], [7, 7]]);
 
   t.equal(multiPoint.isValid(), true, 'positive validation works');
@@ -142,7 +141,7 @@ test('MultiPolygon via MultiFeature', t => {
   const polygonB = multiPolygon.features[1];
 
   t.deepEqual(polygonA, new Polygon(ctx, {
-    id: polygonA.id,
+    id: 'zing',
     type: 'Feature',
     properties: {},
     geometry: {
@@ -151,7 +150,7 @@ test('MultiPolygon via MultiFeature', t => {
     }
   }));
   t.deepEqual(polygonB, new Polygon(ctx, {
-    id: polygonB.id,
+    id: 'zing',
     type: 'Feature',
     properties: {},
     geometry: {
@@ -186,7 +185,7 @@ test('MultiLineString via MultiFeature', t => {
   const lineStringB = multiLineString.features[1];
 
   t.deepEqual(lineStringA, new LineString(ctx, {
-    id: lineStringA.id,
+    id: 'lineline',
     type: 'Feature',
     properties: {},
     geometry: {
@@ -195,7 +194,7 @@ test('MultiLineString via MultiFeature', t => {
     }
   }));
   t.deepEqual(lineStringB, new LineString(ctx, {
-    id: lineStringB.id,
+    id: 'lineline',
     type: 'Feature',
     properties: {},
     geometry: {

@@ -8,8 +8,7 @@ const mockContext = {
     queryRenderedFeatures: stub().returns([{
       type: 'Feature',
       properties: {
-        meta: 'feature',
-        id: 'foo'
+        meta: 'feature'
       },
       geometry: {
         type: 'LineString',
@@ -18,8 +17,7 @@ const mockContext = {
     }, {
       type: 'Feature',
       properties: {
-        meta: 'nothing',
-        id: 'bar'
+        meta: 'nothing'
       },
       geometry: {
         type: 'Polygon',
@@ -28,18 +26,7 @@ const mockContext = {
     }, {
       type: 'Feature',
       properties: {
-        meta: 'vertex',
-        id: 'baz'
-      },
-      geometry: {
-        type: 'Point',
-        coordinates: [10, 10]
-      }
-    }, {
-      type: 'Feature',
-      properties: {
-        meta: 'vertex',
-        id: 'baz'
+        meta: 'vertex'
       },
       geometry: {
         type: 'Point',
@@ -60,8 +47,7 @@ test('featuresAt with bounding box', t => {
   t.deepEqual(result, [{
     type: 'Feature',
     properties: {
-      meta: 'vertex',
-      id: 'baz'
+      meta: 'vertex'
     },
     geometry: {
       type: 'Point',
@@ -70,14 +56,13 @@ test('featuresAt with bounding box', t => {
   }, {
     type: 'Feature',
     properties: {
-      meta: 'feature',
-      id: 'foo'
+      meta: 'feature'
     },
     geometry: {
       type: 'LineString',
       coordinates: [[0, 0], [1, 1], [2, 2]]
     }
-  }], 'sorts, filters based on properties.meta, removes duplicates');
+  }], 'sorts, and filters out features with the right properties.meta');
 
   t.end();
 });

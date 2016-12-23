@@ -6,11 +6,8 @@ import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by 
  *
  * @return {Object}
  */
-export default function createMockFeatureContext(opts = { userProperties: false}) {
+export default function createMockFeatureContext() {
   return {
-    options: {
-      userProperties: opts.userProperties
-    },
     store: {
       featureChanged: spy()
     }

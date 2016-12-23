@@ -1,13 +1,12 @@
-# Examples
+# 示例
 
-## Styling
+## 样式
 
-See [API.md](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md) for a complete styling reference.
+可以从 [API.md](https://github.com/wanyanyan/gl-draw-foxgis/blob/master/API.md) 中获得完整的样式参考.
 
-### points
+### 点状要素
 
-With this style, all Point features are blue and have a black halo when active.
-No other features are rendered, even if they are present.
+在该样式中，所有点状要素都是蓝色，当选中时会添加黑色光晕，其他的所有要素即使存在也不会被渲染。
 
 ```js
 mapbox.Draw({
@@ -22,7 +21,8 @@ mapbox.Draw({
       'paint': {
         'circle-radius': 7,
         'circle-color': '#000000'
-      }
+      },
+      'interactive': true
     },
     {
       'id': 'points-are-blue',
@@ -34,21 +34,22 @@ mapbox.Draw({
       'paint': {
         'circle-radius': 5,
         'circle-color': '#000088'
-      }
+      },
+      'interactive': true
     }
   ]
 });
 ```
 
-### lines and polygons
+### 线状要素和面状要素
 
-With this style, all line and polygon features are have dashed red outline and transparent fill while being drawn, including the point vertices. When the Draw mode is changed the 'static', these features will be drawn with solid black outline and transparent fill. Point vertices use the same point filter, and render these points twice: once as a larger-radius halo, and again as the vertex inset point.
+在该样式中，所有的点、线和面要素都具有红色虚线边框，填充色为透明。当绘图模式设为 'static'时, 这些要素将会变成黑色实线边框，填充色仍为透明。顶点都是用同样的过滤器，并且每个点会被渲染两次：一次是半径较大的光晕，另一次为实心点。.
 
 ```js
 mapbox.Draw({
   styles: [
-    // ACTIVE (being drawn)
-    // line stroke
+    // 选中状态
+    // 线边框
     {
         "id": "gl-draw-line",
         "type": "line",
@@ -61,9 +62,10 @@ mapbox.Draw({
           "line-color": "#D20C0C",
           "line-dasharray": [0.2, 2],
           "line-width": 2
-        }
+        },
+        "interactive": true
     },
-    // polygon fill
+    // 面填充
     {
       "id": "gl-draw-polygon-fill",
       "type": "fill",
@@ -72,10 +74,11 @@ mapbox.Draw({
         "fill-color": "#D20C0C",
         "fill-outline-color": "#D20C0C",
         "fill-opacity": 0.1
-      }
+      },
+      "interactive": true
     },
-    // polygon outline stroke
-    // This doesn't style the first edge of the polygon, which uses the line stroke styling instead
+    // 面边框
+    // 绘制面的第一个线段的样式没有在此定义，而是使用线要素的样式
     {
       "id": "gl-draw-polygon-stroke-active",
       "type": "line",
@@ -88,9 +91,10 @@ mapbox.Draw({
         "line-color": "#D20C0C",
         "line-dasharray": [0.2, 2],
         "line-width": 2
-      }
+      },
+      "interactive": true
     },
-    // vertex point halos
+    // 顶点的光晕
     {
       "id": "gl-draw-polygon-and-line-vertex-halo-active",
       "type": "circle",
@@ -98,9 +102,10 @@ mapbox.Draw({
       "paint": {
         "circle-radius": 5,
         "circle-color": "#FFF"
-      }
+      },
+      "interactive": true
     },
-    // vertex points
+    // 顶点
     {
       "id": "gl-draw-polygon-and-line-vertex-active",
       "type": "circle",
@@ -108,11 +113,12 @@ mapbox.Draw({
       "paint": {
         "circle-radius": 3,
         "circle-color": "#D20C0C",
-      }
+      },
+      "interactive": true
     },
 
-    // INACTIVE (static, already drawn)
-    // line stroke
+    // 非选中状态，静态模式
+    // 线边框
     {
         "id": "gl-draw-line-static",
         "type": "line",
@@ -124,9 +130,10 @@ mapbox.Draw({
         "paint": {
           "line-color": "#000",
           "line-width": 3
-        }
+        },
+        "interactive": true
     },
-    // polygon fill
+    // 面填充
     {
       "id": "gl-draw-polygon-fill-static",
       "type": "fill",
@@ -135,9 +142,10 @@ mapbox.Draw({
         "fill-color": "#000",
         "fill-outline-color": "#000",
         "fill-opacity": 0.1
-      }
+      },
+      "interactive": true
     },
-    // polygon outline
+    // 面边框
     {
       "id": "gl-draw-polygon-stroke-static",
       "type": "line",
@@ -149,7 +157,8 @@ mapbox.Draw({
       "paint": {
         "line-color": "#000",
         "line-width": 3
-      }
+      },
+      "interactive": true
     }
   ]
 });

@@ -4,7 +4,7 @@ import test from 'tape';
 import xtend from 'xtend';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import createSyntheticEvent from 'synthetic-dom-events';
-import MapboxDraw from '../';
+import GLDraw from '../';
 import click from './utils/mouse_click';
 import createMap from './utils/create_map';
 import createAfterNextRender from './utils/after_next_render';
@@ -15,14 +15,7 @@ document.body.appendChild(container);
 const map = createMap({ container });
 const fireSpy = spy(map, 'fire');
 const afterNextRender = createAfterNextRender(map);
-const Draw = new MapboxDraw();
-const onAdd = Draw.onAdd.bind(Draw);
-let controlGroup = null;
-Draw.onAdd = function(m) {
-  controlGroup = onAdd(m);
-  return controlGroup;
-};
-
+const Draw = GLDraw();
 map.addControl(Draw);
 
 map.on('load', runTests);
@@ -39,10 +32,10 @@ const escapeEvent = createSyntheticEvent('keyup', {
 });
 
 function runTests() {
-  const pointButton = controlGroup.getElementsByClassName('mapbox-gl-draw_point')[0];
-  const lineCutton = controlGroup.getElementsByClassName('mapbox-gl-draw_line')[0];
-  const trashButton = controlGroup.getElementsByClassName('mapbox-gl-draw_trash')[0];
-  const polygonEutton = controlGroup.getElementsByClassName('mapbox-gl-draw_polygon')[0];
+  const pointButton = container.getElementsByClassName('mapbox-gl-draw_point')[0];
+  const lineCutton = container.getElementsByClassName('mapbox-gl-draw_line')[0];
+  const trashButton = container.getElementsByClassName('mapbox-gl-draw_trash')[0];
+  const polygonEutton = container.getElementsByClassName('mapbox-gl-draw_polygon')[0];
 
   // The sequence of these tests matters: each uses state established
   // in the prior tests. These variables keep track of bits of that state.
@@ -84,8 +77,7 @@ function runTests() {
       });
 
       firedWith(t, 'draw.selectionchange', {
-        features: [pointA],
-        points: []
+        features: [pointA]
       });
 
       t.deepEqual(flushDrawEvents(), [
@@ -105,8 +97,7 @@ function runTests() {
     click(map, makeMouseEvent(5, 5));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [],
-        points: []
+        features: []
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -123,8 +114,7 @@ function runTests() {
     click(map, makeMouseEvent(25, 25));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [pointA],
-        points: []
+        features: [pointA]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -146,7 +136,7 @@ function runTests() {
     // Now in `simple_select` mode ...
     map.fire('mousedown', makeMouseEvent(25, 25));
     repeat(10, i => {
-      map.fire('mousemove', makeMouseEvent(25 + i, 25 - i, { buttons: 1 }));
+      map.fire('mousemove', makeMouseEvent(25 + i, 25 - i, { which: 1 }));
     });
     map.fire('mouseup', makeMouseEvent(35, 10));
     afterNextRender(() => {
@@ -197,7 +187,7 @@ function runTests() {
   };
 
   test('create a line', t => {
-    // Now in `draw_line_string` mode...
+    // Now in `draw_line_string` mode ...
     // Move around, then click and move to create the line
     map.fire('mousemove', makeMouseEvent(10, 10));
     map.fire('mousemove', makeMouseEvent(20, 20));
@@ -222,8 +212,7 @@ function runTests() {
       });
 
       firedWith(t, 'draw.selectionchange', {
-        features: [lineA],
-        points: []
+        features: [lineA]
       });
 
       t.deepEqual(flushDrawEvents(), [
@@ -240,8 +229,7 @@ function runTests() {
     click(map, makeMouseEvent(5, 5));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [],
-        points: []
+        features: []
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -256,8 +244,7 @@ function runTests() {
     click(map, makeMouseEvent(30, 30));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [lineA],
-        points: []
+        features: [lineA]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -281,7 +268,7 @@ function runTests() {
     map.fire('mousedown', makeMouseEvent(20, 20));
     // Drag it a little bit
     repeat(10, i => {
-      map.fire('mousemove', makeMouseEvent(20 + i, 20 - i, { buttons: 1 }));
+      map.fire('mousemove', makeMouseEvent(20 + i, 20 - i, { which: 1 }));
     });
     // Release the mouse
     map.fire('mouseup', makeMouseEvent(40, 0));
@@ -308,21 +295,8 @@ function runTests() {
         mode: 'direct_select'
       });
 
-      firedWith(t, 'draw.selectionchange', {
-        features: [lineB],
-        points: [{
-          geometry: {
-            coordinates: [ 40, 20 ],
-            type: 'Point'
-          },
-          properties: {},
-          type: 'Feature'
-        }]
-      });
-
       t.deepEqual(flushDrawEvents(), [
-        'draw.modechange',
-        'draw.selectionchange'
+        'draw.modechange'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -343,7 +317,7 @@ function runTests() {
     map.fire('mousedown', makeMouseEvent(40, 20));
     // Drag it a little bit
     repeat(22, i => {
-      map.fire('mousemove', makeMouseEvent(40 + i, 20 + i, { buttons: 1 }));
+      map.fire('mousemove', makeMouseEvent(40 + i, 20 + i, { which: 1 }));
     });
     // Release the mouse
     map.fire('mouseup', makeMouseEvent(60, 40));
@@ -353,8 +327,7 @@ function runTests() {
         features: [lineC]
       });
       t.deepEqual(flushDrawEvents(), [
-        'draw.update',
-        'draw.selectionchange'
+        'draw.update'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -405,8 +378,7 @@ function runTests() {
         features: [lineE]
       });
       t.deepEqual(flushDrawEvents(), [
-        'draw.update',
-        'draw.selectionchange'
+        'draw.update'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -425,8 +397,7 @@ function runTests() {
       });
 
       firedWith(t, 'draw.selectionchange', {
-        features: [],
-        points: []
+        features: []
       });
 
       t.deepEqual(flushDrawEvents(), [
@@ -473,8 +444,7 @@ function runTests() {
       });
 
       firedWith(t, 'draw.selectionchange', {
-        features: [polygonA],
-        points: []
+        features: [polygonA]
       });
 
       t.deepEqual(flushDrawEvents(), [
@@ -491,8 +461,7 @@ function runTests() {
     click(map, makeMouseEvent(-10, -10));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [],
-        points: []
+        features: []
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -506,14 +475,13 @@ function runTests() {
     // Mouse down with the shift key
     map.fire('mousedown', makeMouseEvent(200, 200, { shiftKey: true }));
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(200 - (10 * i), 200 - (10 * i), { buttons: 1 }));
+      map.fire('mousemove', makeMouseEvent(200 - (10 * i), 200 - (10 * i), { which: 1 }));
     });
     map.fire('mouseup', makeMouseEvent(0, 0));
 
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [lineE, polygonA],
-        points: []
+        features: [lineE, polygonA]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -546,7 +514,7 @@ function runTests() {
     map.fire('mousedown', makeMouseEvent(0, 15));
     // Drag it a little bit
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(0 + i, 15 - i, { buttons: 1 }));
+      map.fire('mousemove', makeMouseEvent(0 + i, 15 - i, { which: 1 }));
     });
     // Release the mouse
     map.fire('mouseup', makeMouseEvent(20, -5));
@@ -569,8 +537,7 @@ function runTests() {
     click(map, makeMouseEvent(-10, -10));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [],
-        points: []
+        features: []
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -584,8 +551,7 @@ function runTests() {
     click(map, makeMouseEvent(48, 0));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [polygonB],
-        points: []
+        features: [polygonB]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -601,22 +567,8 @@ function runTests() {
       firedWith(t, 'draw.modechange', {
         mode: 'direct_select'
       });
-
-      firedWith(t, 'draw.selectionchange', {
-        features: [polygonB],
-        points: [{
-          geometry: {
-            coordinates: [ 20, -20 ],
-            type: 'Point'
-          },
-          properties: {},
-          type: 'Feature'
-        }]
-      });
-
       t.deepEqual(flushDrawEvents(), [
-        'draw.modechange',
-        'draw.selectionchange'
+        'draw.modechange'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -626,7 +578,7 @@ function runTests() {
     // Now in `simple_select` mode ...
     click(map, makeMouseEvent(20, 10, { shiftKey: true }));
     afterNextRender(() => {
-      t.deepEqual(flushDrawEvents(), ['draw.selectionchange'], 'no unexpected draw events');
+      t.deepEqual(flushDrawEvents(), [], 'no unexpected draw events');
       t.end();
     });
   });
@@ -646,7 +598,7 @@ function runTests() {
     map.fire('mousedown', makeMouseEvent(20, 10));
     // Drag it a little bit
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(20 - i, 10, { buttons: 1 }));
+      map.fire('mousemove', makeMouseEvent(20 - i, 10, { which: 1 }));
     });
     // Release the mouse
     map.fire('mouseup', makeMouseEvent(0, 10));
@@ -657,8 +609,7 @@ function runTests() {
         features: [polygonC]
       });
       t.deepEqual(flushDrawEvents(), [
-        'draw.update',
-        'draw.selectionchange'
+        'draw.update'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -709,8 +660,7 @@ function runTests() {
         features: [polygonE]
       });
       t.deepEqual(flushDrawEvents(), [
-        'draw.update',
-        'draw.selectionchange'
+        'draw.update'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -726,8 +676,7 @@ function runTests() {
       click(map, makeMouseEvent(50, 10));
       afterNextRender(() => {
         firedWith(t, 'draw.selectionchange', {
-          features: [polygonE],
-          points: []
+          features: [polygonE]
         });
         t.deepEqual(flushDrawEvents(), [
           'draw.selectionchange'
@@ -743,8 +692,7 @@ function runTests() {
     click(map, makeMouseEvent(82, 22, { shiftKey: true }));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [polygonE, lineF],
-        points: []
+        features: [polygonE, lineF]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -865,8 +813,7 @@ function runTests() {
       });
 
       firedWith(t, 'draw.selectionchange', {
-        features: [expectedLine],
-        points: []
+        features: [expectedLine]
       });
 
       firedWith(t, 'draw.modechange', {
@@ -921,8 +868,7 @@ function runTests() {
       });
 
       firedWith(t, 'draw.selectionchange', {
-        features: [expectedPolygon],
-        points: []
+        features: [expectedPolygon]
       });
 
       firedWith(t, 'draw.modechange', {
@@ -976,8 +922,6 @@ function flushDrawEvents() {
     if (typeof eventName !== 'string' || eventName.indexOf('draw.') !== 0) continue;
     // Ignore draw.render events for now
     if (eventName === 'draw.render') continue;
-    // Ignore draw.actionable events for now
-    if (eventName === 'draw.actionable') continue;
     drawEvents.push(eventName);
   }
   fireSpy.reset();

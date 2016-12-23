@@ -8,13 +8,15 @@ const createVertex = require('../lib/create_vertex');
 module.exports = function(ctx) {
   const line = new LineString(ctx, {
     type: Constants.geojsonTypes.FEATURE,
-    properties: {},
+    properties: {
+      type:Constants.featureTypes.LINE
+    },
     geometry: {
       type: Constants.geojsonTypes.LINE_STRING,
       coordinates: []
     }
   });
-  let currentVertexPosition = 0;
+  var currentVertexPosition = 0;
 
   if (ctx._test) ctx._test.line = line;
 
@@ -26,38 +28,33 @@ module.exports = function(ctx) {
       doubleClickZoom.disable(ctx);
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.LINE);
-      this.on('mousemove', CommonSelectors.true, (e) => {
+      this.on('mousemove', CommonSelectors.true, function(e){
         line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
         if (CommonSelectors.isVertex(e)) {
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
         }
       });
-      this.on('click', CommonSelectors.true, (e) => {
-        if (currentVertexPosition > 0 && isEventAtCoordinates(e, line.coordinates[currentVertexPosition - 1])) {
+      this.on('click', CommonSelectors.true, function(e){
+        if(currentVertexPosition > 0 && isEventAtCoordinates(e, line.coordinates[currentVertexPosition - 1])) {
           return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
         }
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
         line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
         currentVertexPosition++;
       });
-      this.on('click', CommonSelectors.isVertex, () => {
+      this.on('click', CommonSelectors.isVertex, function(){
         return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
       });
-      this.on('keyup', CommonSelectors.isEscapeKey, () => {
+      this.on('keyup', CommonSelectors.isEscapeKey, function(){
         ctx.store.delete([line.id], { silent: true });
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
       });
-      this.on('keyup', CommonSelectors.isEnterKey, () => {
+      this.on('keyup', CommonSelectors.isEnterKey, function(){
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
-      });
-      ctx.events.actionable({
-        combineFeatures: false,
-        uncombineFeatures: false,
-        trash: true
       });
     },
 
-    stop() {
+    stop:function(){
       doubleClickZoom.enable(ctx);
       ctx.ui.setActiveButton();
 
@@ -65,18 +62,19 @@ module.exports = function(ctx) {
       if (ctx.store.get(line.id) === undefined) return;
 
       //remove last added coordinate
-      line.removeCoordinate(`${currentVertexPosition}`);
+      line.removeCoordinate(String(currentVertexPosition));
       if (line.isValid()) {
         ctx.map.fire(Constants.events.CREATE, {
           features: [line.toGeoJSON()]
         });
-      } else {
+      }
+      else {
         ctx.store.delete([line.id], { silent: true });
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
       }
     },
 
-    render(geojson, callback) {
+    render:function(geojson, callback){
       const isActiveLine = geojson.properties.id === line.id;
       geojson.properties.active = (isActiveLine) ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
       if (!isActiveLine) return callback(geojson);
@@ -85,14 +83,14 @@ module.exports = function(ctx) {
       if (geojson.geometry.coordinates.length < 2) return;
       geojson.properties.meta = Constants.meta.FEATURE;
 
-      if (geojson.geometry.coordinates.length >= 3) {
-        callback(createVertex(line.id, geojson.geometry.coordinates[geojson.geometry.coordinates.length - 2], `${geojson.geometry.coordinates.length - 2}`, false));
+      if(geojson.geometry.coordinates.length >= 3) {
+        callback(createVertex(line.id, geojson.geometry.coordinates[geojson.geometry.coordinates.length-2], String(geojson.geometry.coordinates.length-2), false));
       }
 
       callback(geojson);
     },
 
-    trash() {
+    trash:function(){
       ctx.store.delete([line.id], { silent: true });
       ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
     }

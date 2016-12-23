@@ -1,6 +1,7 @@
-const Feature = require('./feature');
+var Feature = require('./feature');
 
-const LineString = function(ctx, geojson) {
+var LineString = function(ctx, geojson) {
+  if(!ctx){return;}
   Feature.call(this, ctx, geojson);
 };
 
@@ -12,12 +13,12 @@ LineString.prototype.isValid = function() {
 
 LineString.prototype.addCoordinate = function(path, lng, lat) {
   this.changed();
-  const id = parseInt(path, 10);
+  var id = parseInt(path, 10);
   this.coordinates.splice(id, 0, [lng, lat]);
 };
 
 LineString.prototype.getCoordinate = function(path) {
-  const id = parseInt(path, 10);
+  var id = parseInt(path, 10);
   return JSON.parse(JSON.stringify(this.coordinates[id]));
 };
 
@@ -27,7 +28,7 @@ LineString.prototype.removeCoordinate = function(path) {
 };
 
 LineString.prototype.updateCoordinate = function(path, lng, lat) {
-  const id = parseInt(path, 10);
+  var id = parseInt(path, 10);
   this.coordinates[id] = [lng, lat];
   this.changed();
 };

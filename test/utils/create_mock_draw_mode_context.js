@@ -1,9 +1,9 @@
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 
 export default function createMockDrawModeContext() {
-  const _store = {};
+  var _store = {};
 
-  const api = {
+  var api = {
     store: {
       add: function(f) {
         _store[f.id] = f;
@@ -18,8 +18,7 @@ export default function createMockDrawModeContext() {
       }
     },
     events: {
-      changeMode: spy(),
-      actionable: spy()
+      changeMode: spy()
     },
     ui: {
       queueMapClasses: spy(),

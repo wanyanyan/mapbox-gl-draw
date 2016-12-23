@@ -6,7 +6,9 @@ module.exports = function(ctx) {
 
   const point = new Point(ctx, {
     type: Constants.geojsonTypes.FEATURE,
-    properties: {},
+    properties: {
+      type:Constants.featureTypes.POINT
+    },
     geometry: {
       type: Constants.geojsonTypes.POINT,
       coordinates: []
@@ -32,35 +34,30 @@ module.exports = function(ctx) {
   }
 
   return {
-    start() {
+    start:function(){
       ctx.store.clearSelected();
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.POINT);
       this.on('click', CommonSelectors.true, handleClick);
       this.on('keyup', CommonSelectors.isEscapeKey, stopDrawingAndRemove);
       this.on('keyup', CommonSelectors.isEnterKey, stopDrawingAndRemove);
-      ctx.events.actionable({
-        combineFeatures: false,
-        uncombineFeatures: false,
-        trash: true
-      });
     },
 
-    stop() {
+    stop:function(){
       ctx.ui.setActiveButton();
       if (!point.getCoordinate().length) {
         ctx.store.delete([point.id], { silent: true });
       }
     },
 
-    render(geojson, callback) {
+    render:function(geojson, callback){
       const isActivePoint = geojson.properties.id === point.id;
       geojson.properties.active = (isActivePoint) ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
       if (!isActivePoint) return callback(geojson);
       // Never render the point we're drawing
     },
 
-    trash() {
+    trash:function(){
       stopDrawingAndRemove();
     }
   };

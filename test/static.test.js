@@ -1,8 +1,8 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
-import MapboxDraw from '../';
+import GLDraw from '../';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
-import setupAfterNextRender from './utils/after_next_render';
+import AfterNextRender from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';
 import getGeoJSON from './utils/get_geojson';
 import createMap from './utils/create_map';
@@ -10,38 +10,39 @@ import Constants from '../src/constants';
 
 test('static', t => {
 
-  const map = createMap();
+  var map = createMap();
   spy(map, 'fire');
   map.dragPan.disable.restore();
   spy(map.dragPan, 'disable');
 
-  const Draw = new MapboxDraw();
+  var Draw = GLDraw();
   map.addControl(Draw);
 
-  const afterNextRender = setupAfterNextRender(map);
+  var afterNextRender = AfterNextRender(map);
 
-  const cleanUp = function(cb) {
+  var cleanUp = function(cb) {
     Draw.deleteAll();
     map.fire.reset();
     if (cb) cb();
   };
 
-  const getFireArgs = function() {
-    const args = [];
-    for (let i = 0; i < map.fire.callCount; i++) {
+  var getFireArgs = function() {
+    var args = [];
+    for (var i = 0; i < map.fire.callCount; i++) {
       args.push(map.fire.getCall(i).args);
     }
     return args;
   };
 
   t.test('static - init map for tests', t => {
-    const done = function() {
+    var done = function() {
       map.off('load', done);
       t.end();
     };
     if (map.loaded()) {
       done();
-    } else {
+    }
+    else {
       map.on('load', done);
     }
   });
@@ -60,14 +61,14 @@ test('static', t => {
       map.fire('mousemove', makeMouseEvent(15, 15, { shiftKey: true }));
       map.fire('mouseup', makeMouseEvent(15, 15, { shiftKey: true }));
 
-      const args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
+      var args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
       t.equal(args.length, 0, 'should have zero selectionchange events');
       cleanUp(t.end);
     });
   });
 
-  t.test('static - try clicking many features', t => {
-    const features = [getGeoJSON('point'), getGeoJSON('line'), getGeoJSON('square')];
+   t.test('static - try clicking many features', t => {
+    var features = [getGeoJSON('point'), getGeoJSON('line'), getGeoJSON('square')];
     Draw.add({
       type: 'FeatureCollection',
       features: features
@@ -82,7 +83,7 @@ test('static', t => {
       map.fire('mousemove', makeMouseEvent(1, 1));
       map.fire('mouseup', makeMouseEvent(1, 1));
 
-      const args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
+      var args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
       t.equal(args.length, 0, 'should have zero selectionchange events');
       cleanUp(t.end);
     });

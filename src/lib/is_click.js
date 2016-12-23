@@ -4,7 +4,8 @@ const FINE_TOLERANCE = 4;
 const GROSS_TOLERANCE = 12;
 const INTERVAL = 500;
 
-module.exports = function isClick(start, end, options = {}) {
+module.exports = function isClick(start, end, options) {
+  if(options===undefined){options={};}
   const fineTolerance = (options.fineTolerance != null) ? options.fineTolerance : FINE_TOLERANCE;
   const grossTolerance = (options.grossTolerance != null) ? options.grossTolerance : GROSS_TOLERANCE;
   const interval = (options.interval != null) ? options.interval : INTERVAL;
@@ -13,6 +14,6 @@ module.exports = function isClick(start, end, options = {}) {
   start.time = start.time || end.time;
   const moveDistance = euclideanDistance(start.point, end.point);
 
-  return moveDistance < fineTolerance ||
-    (moveDistance < grossTolerance && (end.time - start.time) < interval);
+  return moveDistance < fineTolerance
+    || (moveDistance < grossTolerance && (end.time - start.time) < interval);
 };

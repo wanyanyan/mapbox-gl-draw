@@ -1,11 +1,11 @@
 export default function(map) {
-  let render = 0;
-  map.on('draw.render', () => {
+  var render = 0;
+  map.on('draw.render', function() {
     render++;
   });
   return function(cb) {
-    const lastRender = render;
-    const id = setInterval(() => {
+    var lastRender = render;
+    var id = setInterval(function() {
       if (lastRender < render) {
         clearInterval(id);
         cb();

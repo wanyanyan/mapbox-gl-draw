@@ -1,13 +1,7 @@
-module.exports = function(ctx) {
+module.exports = function() {
   return {
     stop: function() {},
-    start: function() {
-      ctx.events.actionable({
-        combineFeatures: false,
-        uncombineFeatures: false,
-        trash: false
-      });
-    },
+    start: function() {},
     render: function(geojson, push) {
       push(geojson);
     }
