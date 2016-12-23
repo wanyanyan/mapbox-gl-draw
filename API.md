@@ -1,13 +1,13 @@
-# API 参考
+# API Reference
 
-使用方法
+To use Draw
 
 ```js
-var Draw = mapboxgl.Draw({ options });
+var Draw = new MapboxDraw({ options });
 map.addControl(Draw);
 ```
 
-只有在地图加载完才能使用Draw，因此最好在mapbox-gl地图的 `load` 事件回调中添加Draw的交互:
+Draw only works after the map has loaded so it is wise to perform any interactions in the `load` event callback of mapbox-gl:
 
 ```js
 map.on('load', function() {
@@ -17,126 +17,88 @@ map.on('load', function() {
 });
 ```
 
-## Options选项
+## Options
 
-选项 | 类型 | 功能
+option | values | function
 --- | --- | ---
-drawing | boolean | 是否允许绘制和删除要素 - 默认: `true`
-keybindings | boolean | 为绘图绑定快捷键 - 默认: `true`
+keybindings | boolean | Keyboard shortcuts for drawing - default: `true`
 boxSelect | boolean | If true, shift + click to features. If false, click + select zooms to area - default: `true`
-clickBuffer | number | 鼠标点击时选取要素的缓冲区 - 默认: `2`
-displayControlsDefault | boolean | 设置控制选项的默认值 - default `true`
-controls | Object | 自定义控制按钮. 从 `displayControlsDefault` 中获得默认值. 可选的值有: point, line, polygon, trash.
-styles | Array | 样式对象的数组. 默认情况Draw会提供一个默认的样式，如果要覆盖默认样式，可参考[Styling Draw](#styling-draw).
+clickBuffer | number | On click, include features beyond the coordinates of the click by clickBuffer value all directions - default: `2`
+displayControlsDefault | boolean | Sets default value for the control keys in the control option - default `true`
+userProperties | boolean | If true, user properties will be present and prefixed with `user_` on the feature objects via styling. - default `false`
+controls | Object | Lets you hide or show individual controls. See `displayControlsDefault` for default. Available options are: `point`, `line_string`, `polygon`, `trash`, `combine_features` and `uncombine_features`.
+styles | Array | An array of style objects. By default draw provides a style for you. To override this see [Styling Draw](#styling-draw) further down.
 
-## 模式
+## Modes
 
-模式名称作为枚举类存储在 `Draw.modes`中。
+The modes names are available as an enum at `Draw.modes`.
 
 ### `simple_select`
 
 `Draw.modes.SIMPLE_SELECT === 'simple_select'`
 
-允许选择、删除和移动要素。
+Lets you select, delete and drag features.
 
 In this mode, features can have their active state changed by the user. To control what is active, react to changes as described in the events section below.
 
-每次单个要素绘制完成以后会自动进入 `simple_select` 模式.
+Draw will transition into `simple_select` mode every time a single feature has completed drawing.
 
 ### `direct_select`
 
 `Draw.modes.DIRECT_SELECT === 'direct_select'`
 
-该模式下可以选择、删除和移动要素的节点。
+Lets you select, delete and drag vertices.
 
-点状要素不具有`direct_select` 模式。
+`direct_select` mode doesn't handle point features.
 
 ### `draw_line_string`
 
 `Draw.modes.DRAW_LINE_STRING === 'draw_line_string'`
 
-绘制普通线状要素
+Lets you draw a LineString feature.
 
 ### `draw_polygon`
 
 `Draw.modes.DRAW_POLYGON === 'draw_polygon'`
 
-绘制一个普通面状要素
+Lets you draw a Polygon feature.
 
 ### `draw_point`
 
 `Draw.modes.DRAW_POINT === 'draw_point'`
 
-绘制一个点状要素
-
-### `draw_arc`
-
-`Draw.modes.DRAW_ARC === 'draw_arc'`
-
-三点画弧
-
-### `draw_arrow`
-
-`Draw.modes.DRAW_ARROW === 'draw_arrow'`
-
-绘制一个趋势箭头
-
-### `draw_bezier`
-
-`Draw.modes.DRAW_BEZIER === 'draw_bezier'`
-
-四点绘制贝塞尔曲线
-
-### `draw_circle`
-
-`Draw.modes.DRAW_CIRCLE === 'draw_circle'`
-
-通过一个点和半径画一个圆
-
-### `draw_rectangle`
-
-`Draw.modes.DRAW_RECTANGLE === 'draw_retangle'`
-
-画一个矩形
-
-### `draw_triangle`
-
-`Draw.modes.DRAW_TRIANGLE === 'draw_triangle'`
-
-画一个三角形
+Lets you draw a Point feature.
 
 ### `static`
 
 `Draw.modes.STATIC === 'static'`
 
-该模式下所有绘制的要素都禁止编辑，该模式不具备任何可传递的参数。
+Disables editing for all drawn features. It does not take an options argument.
 
-注意：该模式只能通过调用 `.changeMode` 函数进入或退出。
+Note that this mode can only be entered or exited via `.changeMode`
 
-## API 方法
+## API Methods
 
-`mapboxgl.Draw()` 返回一个 `Draw` 实例，该实例具有以下API方法:
+`new MapboxDraw()` returns an instance of `Draw` which has the following API for working with your data:
 
 ###`.add(Object: GeoJSON) -> [String]`
 
-将一个geojson要素添加到地图上
-输入参数：geojson类型的要素(feature)或要素集(featurecollection)
-返回值：包含所添加要素id的数组
+This method takes either a Feature or a FeatureCollection and adds it to Draw. It returns an array of ids for interacting with the added features.
 
-目前支持的geojson要素类型有 `Point`, `LineString`, `Polygon`, `MultiPoint`,  `MultiLineString`,  `MultiPolygon`.
+Currently the supported GeoJSON feature types are `Point`, `LineString`, `Polygon`, `MultiPoint`,  `MultiLineString`, and `MultiPolygon`.
 
-如果输入的要素id与一个已存在的要素id相同，则会更新已存在的要素。
+Adding a feature with the same id as another feature performs an update.
 
-示例:
+Example:
 
 ```js
 var feature = { type: 'Point', coordinates: [0, 0] };
 var featureId = Draw.add(feature);
 console.log(featureId);
-//=> '随机生成的字符串'
+//=> 'random-string'
 ```
 
-示例（包含id）:
+Example with ID:
 
 ```js
 var feature = { type: 'Point', coordinates: [0, 0], id: 'unique-id' };
@@ -145,11 +107,12 @@ console.log(featureId)
 //=> unique-id
 ```
 
+---
 ###`.get(String: featureId) -> Object`
 
-输入id，返回对应的geojson要素
+This method takes an ID returns a GeoJSON feature.
 
-示例:
+Example:
 
 ```js
 var id = Draw.add({ type: 'Point', coordinates: [0, 0] });
@@ -157,24 +120,42 @@ console.log(Draw.get(id));
 //=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] } }
 ```
 
+---
 ### `.getFeatureIdsAt(Object: point) -> [featureId, featuresId]`
 
-给定一个具有x、y属性的点，返回该点范围内所有绘制的要素id。x和y的值为像素坐标，不是经纬度。
+This method takes an object with x and y and returns a list of
+features currently rendered by draws at that spot.
+
+This is good for using mouse events to get information out of draw.
+
+x and y must be from from pixel space, not latitude and longitude.
 
 ```js
 var featureIds = Draw.getFeatureIdsAt(20, 20);
 console.log(featureIds)
 //=> ['top-feature-at-20-20', 'another-feature-at-20-20']
 ```
+---
 ### `.getSelectedIds() -> [featureId, featuresId]`
 
-返回所有处于选中状态的要素id，如果没有要素被选中，则返回空数组。
+This method returns the feature ids for all features currently in a selected state. If no features are currently selected than it will return an empty array.
 
+---
+### `.getSelected() -> Object`
+
+This method returns a FeatureCollection of all the selected features. If nothing is selected, it will return an empty FeatureCollection.
+
+---
+###`.getSelectedPoints() -> [Object: GeoJSON]`
+
+This method returns all vertices currently in a selected state in an array of GeoJSON points.
+
+---
 ###`.getAll() -> Object`
 
-以geojson要素集的形式返回所有绘制的要素。
+This method returns all features added to Draw in a single GeoJSON FeatureCollection.
 
-示例:
+Example:
 
 ```js
 Draw.add({ type: 'Point', coordinates: [0, 0] });
@@ -211,14 +192,15 @@ console.log(Draw.getAll());
 //  ]
 //}
 ```
+---
 
 ###`.delete(String | Array<String> : id) -> Draw`
 
-给定一个id或者一个包含多个id的数组，删除对应id的要素。
+This method takes an id or an array of ids and removes the corresponding features from Draw.
 
-在 `direct_select` 模式，删除选中的要素会退出该模式，返回到 `simple_select` 模式
+In `direct_select` mode, deleting the active feature will stop the mode and revert to the `simple_select` mode.
 
-示例:
+Example:
 
 ```js
 var feature = { type: 'Point', coordinates: [0, 0] };
@@ -233,9 +215,9 @@ Draw
 
 ###`.deleteAll() -> Draw`
 
-删除绘制的所有要素
+This method removes all geometries in Draw.
 
-示例:
+Example:
 
 ```js
 Draw.add({ type: 'Point', coordinates: [0, 0] });
@@ -249,9 +231,9 @@ Draw
 
 ### `.set(Object: featureCollection) -> [featureId, featureId]`
 
-给定一个geojson要素集，将地图上绘制的要素重置为该要素集。从效果上来说，相当于执行 `Draw.deleteAll()` 然后再调用 `Draw.add(featureCollection)`。
+This function takes a featureCollection and performs the required delete, create and update actions internally to make Draw represent this change. Effectively this is the same as `Draw.deleteAll()` followed by `Draw.add(featureCollection)` except that it doesn't effect performance as much.
 
-示例:
+Example:
 
 ```js
 var ids = Draw.set({type: 'FeatureCollection', features: [{
@@ -267,35 +249,73 @@ var ids = Draw.set({type: 'FeatureCollection', features: [{
 
 ### `.trash() -> Draw`
 
-触发当前模式下的trash事件，在 `simple_select` 模式下会删除所有选中的要素，在 `direct_select` 模式下会删除所有选中的节点，在绘图模式下会取消当前的绘图进程。
+This invokes the current modes trash action. For the `simple_select` mode this deletes all active features. For the `direct_select` mode this deletes the active vertices. For the drawing modes, this cancels the current process.
 
-与`delete` 或 `deleteAlll` 不同的是，该方法遵循在不同模式下定义的不同规则。
+This is different from `delete` or `deleteAll` in that it follows rules described by the current mode.
+
+---
+
+### `.combineFeatures() -> Draw`
+
+This invokes the current modes combineFeatures action. For the `simple_select` mode this function will combine all selected features into a multifeature, so long as they are all of the same geometry type. For example:
+
+- LineString, LineString => MultiLineString
+- MultiLineString, LineString => MultiLineString
+- MultiLineString, MultiLineString => MultiLineString
+
+Calling this function on different geometry types will not cause any changes. For example:
+
+- Point, LineString => no action taken
+- MultiLineString, MultiPoint => no action taken
+
+When called in the `direct_select` and drawing modes no action is taken. The current modes are also not exited.
+
+---
+
+### `.uncombineFeatures() -> Draw`
+
+This invokes the current modes uncombineFeatures action. For the `simple_select` mode this takes the currently selected features, and for each multi-feature selected, it will split it into its component feature parts. For example:
+
+- MultiLineString (of two parts) => LineString, LineString 
+- MultiLineString (of three parts) => LineString, LineString, LineString
+- MultiLineString (of two parts), Point => LineString, LineString, Point
+- LineString => LineString
+
+When called in the `direct_select` and drawing modes no action is taken. The current modes are also not exited.
 
 ---
 
 ### `.getMode() -> Draw`
 
-返回当前的模式
+Returns Draw's current mode. For more about the modes, see below.
+
+---
 
 ### `.changeMode(String: mode, ?Object: options) -> Draw`
 
-`changeMode` 触发模式切换进程， `mode` 只能是指定字符串中的一个， `simple_select` 模式和 `direct_select` 模式可以接受一个 `options` 对象作为参数。
+`changeMode` triggers the mode switching process inside Draw. `mode` must be one of the below strings. `simple_select` and `direct_select` modes accept an `options` object.
 
 ```js
-// `simple_select`模式的options参数
+// `simple_select` options
 {
-  // 指定的这些要素将会被初始化选中
+  // Array of ids of features that will be initially selected
   featureIds: Array<string>
 }
 ```
 
 ```js
-// `direct_select`模式的options参数
+// `direct_select` options
 {
-  // 指定的要素将会在编辑状态下选中
+  // The id of the feature that is directly selected (required)
   featureId: string
 }
 ```
+
+---
+
+### `.setFeatureProperty(String: featureId, String: property, Any: value) -> Draw`
+
+Sets the value of a property on the indicated feature. This is good if you are using Draw as your primary data store in your application.
 
 ## Events
 
@@ -337,6 +357,38 @@ The event data is an object with the following shape:
 }
 ```
 
+### `draw.combine`
+
+Fired when features are combined. The following will trigger this event:
+
+- Click the Combine button when more than one features are selected in `simple_select` mode.
+- Invoke `Draw.combineFeatures()` when you have more than one features selected in `simple_select` mode.
+
+The event data is an object with the following shape:
+
+```js
+{
+  deletedFeatures: Array<Object>, // Array of GeoJSON objects representing the features that were deleted
+  createdFeatures: Array<Object> // Array of GeoJSON objects representing the multifeature that has been created
+}
+```
+
+### `draw.uncombine`
+
+Fired when features are uncombined. The following will trigger this event:
+
+- Click the Uncombine button when one or more multifeatures are selected in `simple_select` mode. Non multifeatures may also be selected.
+- Invoke `Draw.uncombineFeatures()` when you have one or more multifeatures selected in `simple_select` mode. Non multifeatures may also be selected.
+
+The event data is an object with the following shape:
+
+```js
+{
+  deletedFeatures: Array<Object>, // Array of GeoJSON objects representing the multifeatures that were deleted
+  createdFeatures: Array<Object> // Array of GeoJSON objects representing the single features that have been created
+}
+```
+
 ### `draw.update`
 
 Fired when one or more features are updated. The following will trigger this event, which can be subcategorized by `action`:
@@ -365,12 +417,16 @@ The event data is an object with the following shape:
 Fired when the selection is changed (one or more features are selected or deselected). The following will trigger this event:
 
 - Click on a feature to select it.
-- Create a box-selection that includes at least one feature.
 - When a feature is already selected, shift-click on another feature to add it to the selection.
+- Click on a vertex to select it.
+- When a vertex is already selected, shift-click on another vertex to add it to the selection.
+- Create a box-selection that includes at least one feature.
 - Click outside the selected feature(s) to deselect.
+- Click away from the selected vertex(s) to deselect.
 - Finish drawing a feature (features are selected just after they are created).
 - When a feature is already selected, invoke `Draw.changeMode()` such that the feature becomes deselected.
 - Use `Draw.changeMode('simple_select', { featureIds: [..] })` to switch to `simple_select` mode and immediately select the specified features.
+- Use `Draw.delete`, `Draw.deleteAll` or `Draw.trash` to delete feature(s).
 
 The event data is an object with the following shape:
 
@@ -408,6 +464,21 @@ The event data is an object with the following shape:
 
 Fired just after Draw calls `setData()` on `mapbox-gl-js`. This does not imply that the set data call has updated the map, just that the map is being updated.
 
+
+### `draw.actionable`
+
+Fired as the state of Draw changes to enable and disable different actions. Following this event will enable you know if `Draw.trash()`, `Draw.combineFeatures()` and `Draw.uncombineFeatures()` will have an effect.
+
+```js
+{
+  actions: {
+    trash: true
+    combineFeatures: false,
+    uncombineFeatures: false
+  }
+}
+```
+
 ## Styling Draw
 
 Draw is styled by the [Mapbox GL Style Spec](https://www.mapbox.com/mapbox-gl-style-spec/) with a preset list of properties.
@@ -433,6 +504,8 @@ active | true, false | A feature is active when it is 'selected' in the current 
 mode |  simple_select, direct_select, draw_point, draw_line_string, draw_polygon, static | Indicates which mode Draw is currently in.
 
 Draw also provides a few more properties, but they should not be used for styling. For details on them, see `Using Draw with map.queryRenderFeatures`.
+
+If `opts.userProperties` is set to `true` the properties of a feature will also be available for styling. All user properties are prefixed with `user_` to make sure they do not clash with the Draw properties.
 
 ### Example Custom Styles
 

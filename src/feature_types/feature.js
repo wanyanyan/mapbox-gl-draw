@@ -1,7 +1,7 @@
-var hat = require('hat');
-var Constants = require('../constants');
+const hat = require('hat');
+const Constants = require('../constants');
 
-var Feature = function(ctx, geojson) {
+const Feature = function(ctx, geojson) {
   this.ctx = ctx;
   this.properties = geojson.properties || {};
   this.coordinates = geojson.geometry.coordinates;
@@ -26,9 +26,8 @@ Feature.prototype.getCoordinates = function() {
   return JSON.parse(JSON.stringify(this.coordinates));
 };
 
-//wanyanyan 2016/11/09 设置属性
-Feature.prototype.setProperty = function(name,value){
-  this.properties[name] = value;
+Feature.prototype.setProperty = function(property, value) {
+  this.properties[property] = value;
 };
 
 Feature.prototype.toGeoJSON = function() {
@@ -44,17 +43,20 @@ Feature.prototype.toGeoJSON = function() {
 };
 
 Feature.prototype.internal = function(mode) {
-  var properties = {
+  const properties = {
     id: this.id,
     meta: Constants.meta.FEATURE,
     'meta:type': this.type,
     active: Constants.activeStates.INACTIVE,
     mode: mode
   };
-  //wanyanyan 2016/11/09 设置属性（修改）
-  for(var name in this.properties){
-    properties[name] = this.properties[name];
+
+  if (this.ctx.options.userProperties) {
+    for (const name in this.properties) {
+      properties[`user_${name}`] = this.properties[name];
+    }
   }
+
   return {
     type: Constants.geojsonTypes.FEATURE,
     properties: properties,

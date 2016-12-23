@@ -86,10 +86,7 @@ function main() {
 }
 
 function log(color, message) {
-    var logDiv = document.getElementById('logs');
-    if(logDiv){
-        logDiv.innerHTML += '<div class="log dark fill-' + color + '"><p>' + message + '</p></div>';
-    }  
+    document.getElementById('logs').innerHTML += '<div class="log dark fill-' + color + '"><p>' + message + '</p></div>';
 }
 
 function getAccessToken() {
@@ -118,7 +115,7 @@ function createMap(options) {
     mapElement.style.width = options.width + 'px';
     mapElement.style.height = options.height + 'px';
 
-    mapboxgl.accessToken = mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpbG10dnA3NzY3OTZ0dmtwejN2ZnUycjYifQ.1W5oTOnWXQ9R1w8u3Oo1yA';
+    mapboxgl.accessToken = getAccessToken();
     var map = new mapboxgl.Map(util.extend({
         container: 'map',
         style: 'mapbox://styles/mapbox/streets-v8'

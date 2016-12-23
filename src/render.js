@@ -2,41 +2,41 @@ const Constants = require('./constants');
 
 module.exports = function render() {
   const store = this;
-  var mapExists = store.ctx.map && store.ctx.map.getSource(Constants.sources.HOT) !== undefined;
+  const mapExists = store.ctx.map && store.ctx.map.getSource(Constants.sources.HOT) !== undefined;
   if (!mapExists) return cleanup();
 
-  var mode = store.ctx.events.currentModeName();
+  const mode = store.ctx.events.currentModeName();
 
-  store.ctx.ui.queueMapClasses({ mode:mode });
+  store.ctx.ui.queueMapClasses({ mode });
 
-  var newHotIds = [];
-  var newColdIds = [];
+  let newHotIds = [];
+  let newColdIds = [];
 
   if (store.isDirty) {
     newColdIds = store.getAllIds();
   } else {
-    newHotIds = store.getChangedIds().filter(function(id){return store.get(id) !== undefined;});
-    newColdIds = store.sources.hot.filter(function getColdIds(geojson) {
+    newHotIds = store.getChangedIds().filter(id => store.get(id) !== undefined);
+    newColdIds = store.sources.hot.filter((geojson) => {
       return geojson.properties.id && newHotIds.indexOf(geojson.properties.id) === -1 && store.get(geojson.properties.id) !== undefined;
-    }).map(function(geojson){return geojson.properties.id;});
+    }).map(geojson => geojson.properties.id);
   }
 
   store.sources.hot = [];
-  var lastColdCount = store.sources.cold.length;
-  store.sources.cold = store.isDirty ? [] : store.sources.cold.filter(function saveColdFeatures(geojson) {
-    var id = geojson.properties.id || geojson.properties.parent;
+  const lastColdCount = store.sources.cold.length;
+  store.sources.cold = store.isDirty ? [] : store.sources.cold.filter((geojson) => {
+    const id = geojson.properties.id || geojson.properties.parent;
     return newHotIds.indexOf(id) === -1;
   });
 
-  var coldChanged = lastColdCount !== store.sources.cold.length || newColdIds.length > 0;
+  const coldChanged = lastColdCount !== store.sources.cold.length || newColdIds.length > 0;
 
-  newHotIds.forEach(function(id){ renderFeature(id, 'hot');});
-  newColdIds.forEach(function(id){ renderFeature(id, 'cold');});
+  newHotIds.forEach(id => renderFeature(id, 'hot'));
+  newColdIds.forEach(id => renderFeature(id, 'cold'));
 
   function renderFeature(id, source) {
     const feature = store.get(id);
     const featureInternal = feature.internal(mode);
-    store.ctx.events.currentModeRender(featureInternal, function(geojson){
+    store.ctx.events.currentModeRender(featureInternal, (geojson) => {
       store.sources[source].push(geojson);
     });
   }
@@ -55,13 +55,23 @@ module.exports = function render() {
 
   if (store._emitSelectionChange) {
     store.ctx.map.fire(Constants.events.SELECTION_CHANGE, {
-      features: store.getSelected().map(function(feature){return feature.toGeoJSON()})
+      features: store.getSelected().map(feature => feature.toGeoJSON()),
+      points: store.getSelectedCoordinates().map(coordinate => {
+        return {
+          type: Constants.geojsonTypes.FEATURE,
+          properties: {},
+          geometry: {
+            type: Constants.geojsonTypes.POINT,
+            coordinates: coordinate.coordinates
+          }
+        };
+      })
     });
     store._emitSelectionChange = false;
   }
 
   if (store._deletedFeaturesToEmit.length) {
-    var geojsonToEmit = store._deletedFeaturesToEmit.map(function(feature){return feature.toGeoJSON()});
+    const geojsonToEmit = store._deletedFeaturesToEmit.map(feature => feature.toGeoJSON());
 
     store._deletedFeaturesToEmit = [];
 

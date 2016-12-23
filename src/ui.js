@@ -5,16 +5,17 @@ const classTypes = ['mode', 'feature', 'mouse'];
 
 module.exports = function(ctx) {
 
-  const buttonElements = {};
-  var activeButton = null;
 
-  var currentMapClasses = {
+  const buttonElements = {};
+  let activeButton = null;
+
+  let currentMapClasses = {
     mode: null, // e.g. mode-direct_select
     feature: null, // e.g. feature-vertex
     mouse: null // e.g. mouse-move
   };
 
-  var nextMapClasses = {
+  let nextMapClasses = {
     mode: null,
     feature: null,
     mouse: null
@@ -30,12 +31,12 @@ module.exports = function(ctx) {
     const classesToRemove = [];
     const classesToAdd = [];
 
-    classTypes.forEach(function(type) {
+    classTypes.forEach((type) => {
       if (nextMapClasses[type] === currentMapClasses[type]) return;
 
-      classesToRemove.push(type+"-"+currentMapClasses[type]);
+      classesToRemove.push(`${type}-${currentMapClasses[type]}`);
       if (nextMapClasses[type] !== null) {
-        classesToAdd.push(type+"-"+nextMapClasses[type]);
+        classesToAdd.push(`${type}-${nextMapClasses[type]}`);
       }
     });
 
@@ -50,14 +51,13 @@ module.exports = function(ctx) {
     currentMapClasses = xtend(currentMapClasses, nextMapClasses);
   }
 
-  function createControlButton(id, options) {
-    if(options===undefined){options={};}
+  function createControlButton(id, options = {}) {
     const button = document.createElement('button');
-    button.className = Constants.classes.CONTROL_BUTTON+" "+options.className;
+    button.className = `${Constants.classes.CONTROL_BUTTON} ${options.className}`;
     button.setAttribute('title', options.title);
     options.container.appendChild(button);
 
-    button.addEventListener('click', function(e){
+    button.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
 
@@ -94,35 +94,17 @@ module.exports = function(ctx) {
 
   function addButtons() {
     const controls = ctx.options.controls;
-    if (!controls) return;
+    const controlGroup = document.createElement('div');
+    controlGroup.className = `${Constants.classes.CONTROL_GROUP} ${Constants.classes.CONTROL_BASE}`;
 
-    const ctrlPosClassName = String(Constants.classes.CONTROL_PREFIX)+String(ctx.options.position) || 'top-left';
-    var controlContainer = ctx.container.getElementsByClassName(ctrlPosClassName)[0];
-    if (!controlContainer) {
-      controlContainer = document.createElement('div');
-      controlContainer.className = ctrlPosClassName;
-      ctx.container.appendChild(controlContainer);
-    }
-
-    var controlGroup = controlContainer.getElementsByClassName(Constants.classes.CONTROL_GROUP)[0];
-    if (!controlGroup) {
-      controlGroup = document.createElement('div');
-      controlGroup.className = Constants.classes.CONTROL_GROUP+" "+Constants.classes.CONTROL_BASE;
-
-      const attributionControl = controlContainer.getElementsByClassName(Constants.classes.ATTRIBUTION)[0];
-      if (attributionControl) {
-        controlContainer.insertBefore(controlGroup, attributionControl);
-      } else {
-        controlContainer.appendChild(controlGroup);
-      }
-    }
+    if (!controls) return controlGroup;
 
     if (controls[Constants.types.LINE]) {
       buttonElements[Constants.types.LINE] = createControlButton(Constants.types.LINE, {
         container: controlGroup,
         className: Constants.classes.CONTROL_BUTTON_LINE,
-        title: "LineString tool "+(ctx.options.keybindings && '(l)'),
-        onActivate: function(){ctx.events.changeMode(Constants.modes.DRAW_LINE_STRING);}
+        title: `LineString tool ${ctx.options.keybindings && '(l)'}`,
+        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_LINE_STRING)
       });
     }
 
@@ -130,8 +112,8 @@ module.exports = function(ctx) {
       buttonElements[Constants.types.POLYGON] = createControlButton(Constants.types.POLYGON, {
         container: controlGroup,
         className: Constants.classes.CONTROL_BUTTON_POLYGON,
-        title: "Polygon tool "+(ctx.options.keybindings && '(p)'),
-        onActivate: function(){ ctx.events.changeMode(Constants.modes.DRAW_POLYGON);}
+        title: `Polygon tool ${ctx.options.keybindings && '(p)'}`,
+        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POLYGON)
       });
     }
 
@@ -139,8 +121,8 @@ module.exports = function(ctx) {
       buttonElements[Constants.types.POINT] = createControlButton(Constants.types.POINT, {
         container: controlGroup,
         className: Constants.classes.CONTROL_BUTTON_POINT,
-        title: "Marker tool "+(ctx.options.keybindings && '(m)'),
-        onActivate: function(){ ctx.events.changeMode(Constants.modes.DRAW_POINT);}
+        title: `Marker tool ${ctx.options.keybindings && '(m)'}`,
+        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POINT)
       });
     }
 
@@ -149,15 +131,39 @@ module.exports = function(ctx) {
         container: controlGroup,
         className: Constants.classes.CONTROL_BUTTON_TRASH,
         title: 'Delete',
-        onActivate: function(){
+        onActivate: () => {
           ctx.events.trash();
         }
       });
     }
+
+    if (controls.combine_features) {
+      buttonElements.combine_features = createControlButton('combineFeatures', {
+        container: controlGroup,
+        className: Constants.classes.CONTROL_BUTTON_COMBINE_FEATURES,
+        title: 'Combine',
+        onActivate: () => {
+          ctx.events.combineFeatures();
+        }
+      });
+    }
+
+    if (controls.uncombine_features) {
+      buttonElements.uncombine_features = createControlButton('uncombineFeatures', {
+        container: controlGroup,
+        className: Constants.classes.CONTROL_BUTTON_UNCOMBINE_FEATURES,
+        title: 'Uncombine',
+        onActivate: () => {
+          ctx.events.uncombineFeatures();
+        }
+      });
+    }
+
+    return controlGroup;
   }
 
   function removeButtons() {
-    Object.keys(buttonElements).forEach(function(buttonId){
+    Object.keys(buttonElements).forEach(buttonId => {
       const button = buttonElements[buttonId];
       if (button.parentNode) {
         button.parentNode.removeChild(button);
@@ -167,10 +173,10 @@ module.exports = function(ctx) {
   }
 
   return {
-    setActiveButton:setActiveButton,
-    queueMapClasses:queueMapClasses,
-    updateMapClasses:updateMapClasses,
-    addButtons:addButtons,
-    removeButtons:removeButtons
+    setActiveButton,
+    queueMapClasses,
+    updateMapClasses,
+    addButtons,
+    removeButtons
   };
 };

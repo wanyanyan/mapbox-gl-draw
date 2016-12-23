@@ -1,29 +1,31 @@
 const extent = require('geojson-extent');
 const Constants = require('../constants');
 
-const LAT_MIN = Constants.LAT_MIN;
-const LAT_MAX = Constants.LAT_MAX;
-const LAT_RENDERED_MIN = Constants.LAT_RENDERED_MIN;
-const LAT_RENDERED_MAX = Constants.LAT_RENDERED_MAX;
-const LNG_MIN = Constants.LNG_MIN;
-const LNG_MAX = Constants.LNG_MAX;
+const {
+  LAT_MIN,
+  LAT_MAX,
+  LAT_RENDERED_MIN,
+  LAT_RENDERED_MAX,
+  LNG_MIN,
+  LNG_MAX
+} = Constants;
 
 // Ensure that we do not drag north-south far enough for
 // - any part of any feature to exceed the poles
-// - any feature to be compvarely lost in the space between the projection's
+// - any feature to be completely lost in the space between the projection's
 //   edge and the poles, such that it couldn't be re-selected and moved back
 module.exports = function(geojsonFeatures, delta) {
   // "inner edge" = a feature's latitude closest to the equator
-  var northInnerEdge = LAT_MIN;
-  var southInnerEdge = LAT_MAX;
+  let northInnerEdge = LAT_MIN;
+  let southInnerEdge = LAT_MAX;
   // "outer edge" = a feature's latitude furthest from the equator
-  var northOuterEdge = LAT_MIN;
-  var southOuterEdge = LAT_MAX;
+  let northOuterEdge = LAT_MIN;
+  let southOuterEdge = LAT_MAX;
 
-  var westEdge = LNG_MAX;
-  var eastEdge = LNG_MIN;
+  let westEdge = LNG_MAX;
+  let eastEdge = LNG_MIN;
 
-  geojsonFeatures.forEach(function(feature){
+  geojsonFeatures.forEach(feature => {
     const bounds = extent(feature);
     const featureSouthEdge = bounds[1];
     const featureNorthEdge = bounds[3];
@@ -41,7 +43,7 @@ module.exports = function(geojsonFeatures, delta) {
   // These changes are not mutually exclusive: we might hit the inner
   // edge but also have hit the outer edge and therefore need
   // another readjustment
-  var constrainedDelta = delta;
+  const constrainedDelta = delta;
   if (northInnerEdge + constrainedDelta.lat > LAT_RENDERED_MAX) {
     constrainedDelta.lat = LAT_RENDERED_MAX - northInnerEdge;
   }

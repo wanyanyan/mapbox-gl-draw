@@ -1,22 +1,39 @@
-# gl-draw-foxgis.js
+# mapbox-gl-draw.js
 
-基于 [mapbox-gl-draw](https://github.com/mapbox/mapbox-gl-draw) 0.11.19版本修改，支持在 [mapbox-gl.js](https://www.mapbox.com/mapbox-gl-js/) 地图中添加和编辑要素，除了添加点、线、面以外，支持在地图上绘制曲线、圆弧、圆、矩形、箭头等形状.
+Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapbox.com/mapbox-gl-js/) maps.
 
-### 安装
+[![Circle CI](https://circleci.com/gh/mapbox/mapbox-gl-draw/tree/master.svg?style=svg)](https://circleci.com/gh/mapbox/gl-draw/tree/master)
+
+**Requires [mapbox-gl-js@0.27.0](https://github.com/mapbox/mapbox-gl-js/blob/master/CHANGELOG.md#0270-november-11-2016) or higher.**
+
+### Installing
 
 ```
-npm install wanyanyan/gl-draw-foxgis
+npm install @mapbox/mapbox-gl-draw
 ```
 
-在 `mapbox-gl` 之后添加或包含 `gl-draw-foxgis` .
-
-同时也需要添加 [gl-draw-foxgis.css](https://github.com/wanyanyan/gl-draw-foxgis/blob/master/dist/mapbox-gl-draw.css)的引用
+Draw ships with CSS, make sure you include it in your build. It can be found on our CDN or at `require('mapbox-gl-draw/dist/mapbox-gl-draw.css')`.
 
 ```html
-<link href="gl-draw-foxgis.css" rel="stylesheet" />
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.16.0/mapbox-gl-draw.css' type='text/css' />
 ```
 
-### 在应用程序中使用
+### Usage in your application
+
+**When using modules**
+
+```js
+var mapboxgl = require('mapbox-gl');
+var MapboxDraw = require('@mapbox/mapbox-gl-draw');
+```
+
+**When using a CDN**
+
+```html
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.16.0/mapbox-gl-draw.js'></script>
+```
+
+**Example setup**
 
 ```js
 mapboxgl.accessToken = 'YOUR_ACCESS_TOKEN';
@@ -28,25 +45,45 @@ var map = new mapboxgl.Map({
   zoom: 9
 });
 
-var Draw = mapboxgl.Draw();
+var Draw = new MapboxDraw();
 
 map.addControl(Draw)
 ```
 
-### 可以从 [API.md](https://github.com/wanyanyan/gl-draw-foxgis/blob/master/API.md) 获得完整的API参考.
+### See [API.md](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md) for complete reference.
 
-### 开发或测试
+### Developing and testing
 
-安装所有依赖项, 编译源文件并启动测试服务:
+Install dependencies, build the source files and crank up a server via:
 
 ```
-git clone git@github.com:wanyanyan/gl-draw-foxgis.git
+git clone git@github.com:mapbox/mapbox-gl-draw.git
 npm install
 npm start & open http://localhost:9966/debug/?access_token=<token>
 ```
 
-### 运行测试
+### Testing
 
 ```
 npm run test
 ```
+
+### Publishing
+
+To github and npm
+
+```
+npm version (major|minor|patch)
+git push --tags
+git push
+npm publish
+```
+
+To add to CDN add the js and css files from the `dist` folder to [mapbox-gl-plugins](https://github.com/mapbox/mapbox-gl-plugins/tree/master/plugins/mapbox-gl-draw).
+
+### Naming actions
+
+We're trying to follow standards when naming things. Here is a collection of links where we look for inspriation.
+
+- http://turfjs.org/docs/
+- http://toblerity.org/shapely/manual.html

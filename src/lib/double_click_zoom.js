@@ -1,12 +1,12 @@
 module.exports = {
-  enable:function(ctx) {
-    setTimeout(function(){
+  enable(ctx) {
+    setTimeout(() => {
       if (!ctx.map || !ctx.map.doubleClickZoom) return;
       ctx.map.doubleClickZoom.enable();
     }, 0);
   },
-  disable:function(ctx) {
-    setTimeout(function(){
+  disable(ctx) {
+    setTimeout(() => {
       if (!ctx.map || !ctx.map.doubleClickZoom) return;
       ctx.map.doubleClickZoom.disable();
     }, 0);

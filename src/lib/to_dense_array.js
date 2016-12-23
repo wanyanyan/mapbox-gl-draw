@@ -5,7 +5,7 @@
  * @return {Array<any>}
  */
 function toDenseArray(x) {
-  return [].concat(x).filter(function(y){return y !== undefined});
+  return [].concat(x).filter(y => y !== undefined);
 }
 
 module.exports = toDenseArray;
